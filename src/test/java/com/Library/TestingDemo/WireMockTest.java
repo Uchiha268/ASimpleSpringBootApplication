@@ -1,5 +1,7 @@
 package com.Library.TestingDemo;
 
+import com.Library.TestingDemo.domain.dto.AuthorDto;
+import com.Library.TestingDemo.domain.entity.AuthorEntity;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -8,6 +10,8 @@ import io.restassured.RestAssured;
 import io.restassured.matcher.ResponseAwareMatcher;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import io.restassured.module.mockmvc.response.MockMvcResponse;
+import io.restassured.response.Response;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
@@ -54,11 +58,17 @@ public class WireMockTest {
 
     @Test
     void testWireMock() {
+        AuthorDto authorDto = TestEntityCreation.createTestAuthor4();
         wireMockServer.stubFor(
-                WireMock.get("/authors")
+                WireMock.post("/authors")
                         .willReturn(aResponse()
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"key\" : \"Value\"}")
+                                .withBody("{\n" +
+                                        "    \"id\": 603,\n" +
+                                        "    \"name\": \"Frank Hemsworth\",\n" +
+                                        "    \"age\": 52\n" +
+                                        "}")
+                                .withStatus(201)
                         )
         );
         RestAssured.baseURI = wireMockServer.baseUrl();
@@ -66,11 +76,13 @@ public class WireMockTest {
         RestAssured
                 .given()
                 .header("Content-Type", "application/json")
+                .body(authorDto)
                 .when()
-                .get("/authors")
+                .post("/authors")
                 .then()
-                .statusCode(200)
-                .body("key", is("Value"));
+                .statusCode(201)
+                .body("name", is(authorDto.getName()))
+                .body("age", equalTo(authorDto.getAge()));
     }
 
 

@@ -28,6 +28,13 @@ public class TestEntityCreation {
                 .build();
     }
 
+    public static AuthorDto createTestAuthor4(){
+        return AuthorDto.builder()
+                .name("Frank Hemsworth")
+                .age(52)
+                .build();
+    }
+
     public static BookEntity createTestBook1(AuthorEntity authorEntity){
         return BookEntity.builder()
                 .isbn("1234")
